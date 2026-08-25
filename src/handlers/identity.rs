@@ -26,7 +26,8 @@ use crate::{
     db,
     error::AppError,
     handlers::{
-        allow_totp_drift, enforce_ip_rate_limit, enforce_rate_limit, server_password_iterations,
+        allow_totp_drift, api_key_enabled, enforce_ip_rate_limit, enforce_rate_limit,
+        server_password_iterations,
         twofactor::{is_twofactor_enabled, list_user_twofactors},
     },
     models::{
@@ -880,6 +881,14 @@ pub async fn token(
         "client_credentials" => {
             // Personal API key login (`bw login --apikey`). Port of Vaultwarden's
             // `user_api_key_login`; organization API keys are not supported by this fork.
+            //
+            // Opt-in: without API_KEY_ENABLED this answers exactly like the unknown-grant
+            // fallback below, before the rate limiters and before touching the database,
+            // so the grant is indistinguishable from one that was never implemented.
+            if !api_key_enabled(env.as_ref()) {
+                return Err(AppError::BadRequest("Unsupported grant_type".to_string()));
+            }
+
             let client_id = required_field(payload.client_id.as_deref(), "client_id")?;
 
             enforce_rate_limit(

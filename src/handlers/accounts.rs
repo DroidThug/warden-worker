@@ -12,7 +12,8 @@ use worker::{D1PreparedStatement, Env};
 use crate::d1_query;
 
 use super::{
-    enforce_ip_rate_limit, get_batch_size, server_password_iterations, two_factor_enabled,
+    api_key_enabled, enforce_ip_rate_limit, get_batch_size, server_password_iterations,
+    two_factor_enabled,
 };
 use crate::{
     auth::Claims,
@@ -1114,12 +1115,20 @@ pub async fn post_sstamp(
 
 /// Views (and, when missing or when `rotate` is set, (re)generates) the personal API key.
 /// Both entry points require the master password, like the other sensitive account endpoints.
+///
+/// Opt-in: without API_KEY_ENABLED the endpoints answer 404, so no key is ever
+/// generated and the routes look like they do not exist. The check runs before the
+/// user lookup and before password verification so nothing is observable while off.
 async fn update_api_key(
     claims: Claims,
     env: Arc<Env>,
     payload: PasswordOrOtpData,
     rotate: bool,
 ) -> Result<Json<Value>, AppError> {
+    if !api_key_enabled(&env) {
+        return Err(AppError::NotFound("Not found".to_string()));
+    }
+
     let db = db::get_db(&env)?;
     let user_id = &claims.sub;
 
