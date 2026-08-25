@@ -18,6 +18,7 @@ Warden aims to solve this problem by leveraging the Cloudflare Workers ecosystem
 * **File Attachments:** Optional Cloudflare KV or R2 storage for attachments.
 * **Bitwarden Send:** Share encrypted text or files via a link.
 * **Device Management:** View and revoke active sessions.
+* **Personal API Key:** View and rotate it under Settings > Security > Keys, and use it with `bw login --apikey`.
 * **Live Sync & Push Notifications:** Real-time vault updates via WebSocket and mobile push.
 * **TOTP Support:** Store and generate Time-based One-Time Passwords.
 * **Bitwarden Compatible:** Works with official Bitwarden clients.
@@ -61,6 +62,8 @@ See the [deployment guide](docs/deployment.md) for setup details. R2 may incur a
 * Other Bitwarden advanced features
 
 There are no immediate plans to implement these features. The primary goal of this project is to provide a simple, free, and low-maintenance personal password manager.
+
+Personal API keys are supported: view or rotate the key from **Settings > Security > Keys** in the web vault, then log in with `bw login --apikey`. Organization API keys are not supported.
 
 ## Compatibility
 
